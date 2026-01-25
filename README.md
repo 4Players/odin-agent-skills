@@ -8,13 +8,16 @@ These skills follow the open [Agent Skills specification](https://agentskills.io
 
 | Skill | Description |
 |-------|-------------|
+| **odin-fundamentals** | Platform fundamentals - access keys, tokens, pricing, architecture |
 | **odin-voice** | Core concepts, architecture, authentication, use cases |
 | **odin-voice-unity** | Unity SDK 2.x - OdinRoom, events, 2D/3D spatial audio |
 | **odin-voice-unreal** | Unreal Engine SDK - Blueprints, C++, delegates |
 | **odin-voice-web** | Web/JavaScript SDK - Room, Peer, DeviceManager |
+| **odin-voice-nodejs** | Node.js SDK - server-side integration |
 | **odin-voice-swift** | iOS/macOS SDK (OdinKit) - delegates, Combine |
 | **odin-voice-core** | C/C++ Core SDK - low-level foundation |
-| **odin-fleet** | Game server deployment - CLI, API, Docker/Steamworks |
+| **odin-fleet** | Game server deployment - overview, API, Docker/Steamworks |
+| **odin-fleet-cli** | Fleet CLI - automation, CI/CD pipelines, output formatting, filters |
 | **odin-rooms** | Virtual meeting rooms platform |
 
 ## Installation

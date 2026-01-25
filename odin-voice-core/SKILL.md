@@ -4,26 +4,60 @@ description: |
   ODIN Voice Core SDK (C/C++) - the low-level foundation for all ODIN SDKs.
   Use when: building custom platform integrations, working with C/C++ directly,
   understanding the underlying ODIN architecture, or creating bindings for other languages.
+  Enables seamless integration of real-time voice chat into multiplayer games, applications, and websites.
   This is the base SDK that Unity, Unreal, Web, and Swift SDKs are built upon.
 ---
 
 # ODIN Voice Core SDK (C/C++)
 
-Low-level C API foundation for all ODIN Voice SDKs.
+Low-level C API foundation for all ODIN Voice SDKs, enabling real-time voice chat integration.
 
 ## Overview
 
 The Core SDK is:
-- Built with Rust, exposing a standard C API
-- The foundation for Unity, Unreal, Web, and Swift SDKs
-- For direct C/C++ integration or creating custom bindings
-- Event-driven with RPC (Remote Procedure Call) architecture
+- **Built with Rust**, exposing a standard C API for cross-platform compatibility
+- **Foundation for all platform SDKs** (Unity, Unreal, Web, Swift, NodeJS)
+- **Event-driven architecture** based on RPC (Remote Procedure Calls) with MessagePack encoding
+- **Connection Pool pattern** for efficient connection management
+- **JWT-based authentication** using Ed25519 key pairs
+- **Advanced audio processing** with Opus codec, VAD, echo cancellation, and noise suppression
+- **Flexible deployment** - use 4Players cloud or self-hosted infrastructure
+
+## Supported Platforms
+
+ODIN provides native binaries for:
+
+| Platform | x86_64 | aarch64 | x86 | armv7a |
+|----------|--------|---------|-----|--------|
+| Windows  | ✅     | ✅      | ✅  | —      |
+| Linux    | ✅     | ✅      | ✅  | —      |
+| macOS    | ✅     | ✅      | —   | —      |
+| Android  | ✅     | ✅      | ✅  | ✅     |
+| iOS      | ✅     | ✅      | —   | —      |
+
+Console platforms (Xbox, PlayStation, Nintendo Switch) available upon request.
 
 ## Installation
 
-Download from GitHub: https://github.com/4Players/odin-sdk
+**Repository**: https://github.com/4Players/odin-sdk
 
-Include `odin.h` and link against the ODIN library for your platform.
+**Prerequisites**:
+- CMake 3.10+
+- C++17 compatible compiler
+- Git with LFS support
+
+**Steps**:
+```bash
+git clone https://github.com/4Players/odin-sdk.git
+cd odin-sdk
+git lfs fetch
+git lfs checkout
+```
+
+**Integration**:
+1. Include `odin.h` from the `include/` directory
+2. Link against the ODIN library for your platform from `bin/`
+3. Initialize with `odin_initialize(ODIN_VERSION)`
 
 ## Quick Start
 
@@ -31,33 +65,87 @@ Include `odin.h` and link against the ODIN library for your platform.
 #include "odin.h"
 
 int main() {
-    // 1. Generate access key (for testing only)
+    // 1. Initialize SDK
+    odin_initialize(ODIN_VERSION);
+
+    // 2. Generate access key (for testing only - use server-side in production!)
     char access_key[128];
     odin_access_key_generate(access_key, sizeof(access_key));
 
-    // 2. Create token generator
+    // 3. Create token generator
     OdinTokenGenerator* generator = odin_token_generator_create(access_key);
 
-    // 3. Generate room token
+    // 4. Generate room token with room ID and user ID
     char room_token[512];
     odin_token_generator_create_token(generator, "MyRoom", "User1",
                                        room_token, sizeof(room_token));
     odin_token_generator_destroy(generator);
 
-    // 4. Create and join room
+    // 5. Create connection pool with callbacks
+    OdinConnectionPool* pool = odin_connection_pool_create();
+    odin_connection_pool_set_event_callback(pool, on_rpc_event, NULL);
+    odin_connection_pool_set_datagram_callback(pool, on_audio_datagram, NULL);
+
+    // 6. Create and join room
     OdinRoomHandle room = odin_room_create();
     odin_room_set_event_callback(room, handle_odin_event, NULL);
     odin_room_join(room, "https://gateway.odin.4players.io", room_token);
 
-    // ... main loop ...
+    // 7. Create and add audio stream
+    OdinAudioStreamConfig config = {
+        .sample_rate = 48000,
+        .channel_count = 1
+    };
+    OdinMediaStreamHandle media = odin_audio_stream_create(config);
+    odin_room_add_media(room, media);
 
+    // ... main loop with audio processing ...
+
+    // 8. Cleanup
+    odin_room_remove_media(room, media);
     odin_room_close(room);
     odin_room_destroy(room);
+    odin_connection_pool_destroy(pool);
     return 0;
 }
 ```
 
+## Architecture & Key Concepts
+
+### Connection Pool
+ODIN uses a Connection Pool pattern for efficient connection management:
+- Handles both RPC signaling events and audio datagrams
+- Separate callbacks for control messages (`on_rpc`) and voice data (`on_datagram`)
+- Manages multiple room connections efficiently
+
+### RPC Event System
+- **Event-driven architecture** using Remote Procedure Calls
+- **MessagePack encoding** for efficient binary serialization
+- Events are delivered as structured data that can be deserialized to JSON
+- **Visitor pattern** recommended for routing events to appropriate handlers
+
+### Authentication & Security
+- **JWT-based authentication** using signed JSON Web Tokens
+- **Ed25519 key pairs** for cryptographic signing
+- Tokens contain `"rid"` (room ID) and `"uid"` (user ID) claims
+- **CRITICAL**: Access keys are sensitive credentials - never embed in client-side code!
+- **Production deployment**: Generate tokens server-side
+- **Testing only**: Use `OdinTokenGenerator` for quick prototyping
+
+### Media Signaling
+- **Explicit signaling** for media stream control
+- Operations: Start, Stop, Pause, Resume
+- When joining, send `StartMedia` RPC to announce your stream
+- Handle `PeerUpdateMediaStarted` events to configure decoders for remote peers
+- Direct callbacks on encoders/decoders for performance-critical updates
+
 ## Key Functions
+
+### SDK Initialization
+```c
+// Initialize ODIN SDK (call once at startup)
+int odin_initialize(const char* version);  // Use ODIN_VERSION constant
+```
 
 ### Access Key Management
 ```c
@@ -84,6 +172,29 @@ int odin_token_generator_create_token(
 
 // Cleanup
 void odin_token_generator_destroy(OdinTokenGenerator* generator);
+```
+
+### Connection Pool Management
+```c
+// Create connection pool
+OdinConnectionPool* odin_connection_pool_create();
+
+// Set RPC event callback (handles signaling/events)
+int odin_connection_pool_set_event_callback(
+    OdinConnectionPool* pool,
+    OdinRpcCallback callback,
+    void* user_data
+);
+
+// Set datagram callback (handles audio packets)
+int odin_connection_pool_set_datagram_callback(
+    OdinConnectionPool* pool,
+    OdinDatagramCallback callback,
+    void* user_data
+);
+
+// Cleanup
+void odin_connection_pool_destroy(OdinConnectionPool* pool);
 ```
 
 ### Room Management
@@ -319,13 +430,43 @@ odin_room_add_media(room2, media2);
 
 ## Architecture Notes
 
-- Connection pool pattern for efficient management
-- Event-driven via RPC (Remote Procedure Calls)
-- MessagePack-encoded event payloads
-- Explicit media signaling (Start/Stop/Pause/Resume)
-- JWT authentication with `"rid"` (room ID) and `"uid"` (user ID)
+- **Connection pool pattern** for efficient connection management
+- **Event-driven via RPC** (Remote Procedure Calls) with MessagePack encoding
+- **Explicit media signaling** (Start/Stop/Pause/Resume)
+- **JWT authentication** with Ed25519 signing, `"rid"` (room ID) and `"uid"` (user ID) claims
+- **Opus codec compression** with automatic resampling
+- **Multi-channel audio** support within rooms
+- **No server-side user data storage** required
 
-## Documentation
+## Code Samples
 
-Full API reference: https://docs.4players.io/voice/core/
-GitHub: https://github.com/4Players/odin-sdk
+### Minimal Command Line Client
+Complete example demonstrating:
+- Connection Pool setup with callbacks
+- RPC event handling with MessagePack deserialization
+- Media signaling flow (StartMedia RPC)
+- Bidirectional audio with miniaudio integration
+- Encoder/decoder configuration
+
+**Location**: `test/` directory in the SDK repository
+**Build**: Requires CMake 3.10+, C++17 compiler
+**Run**: `./odin_minimal -r <room_id> -s <server_url>`
+
+## Best Practices
+
+1. **Authentication**: Always generate JWT tokens server-side in production
+2. **Error Handling**: Check all return values with `odin_is_error()` and format errors
+3. **Audio Threading**: Separate threads for capture (push) and playback (read)
+4. **Resource Cleanup**: Always destroy rooms, media streams, and pools in reverse creation order
+5. **APM Configuration**: Enable audio processing (VAD, echo cancellation) before joining rooms
+6. **Multi-Room**: Each room requires its own media stream instance
+7. **Event Processing**: Use visitor pattern or switch statements for efficient event routing
+8. **Production Deployment**: Choose between 4Players cloud or self-hosted infrastructure
+
+## Documentation & Resources
+
+- **Full API Reference**: https://docs.4players.io/voice/core/
+- **GitHub Repository**: https://github.com/4Players/odin-sdk
+- **Minimal Client Sample**: https://docs.4players.io/voice/core/samples/minimal-client/
+- **Event Structures**: Complete RPC event schemas in documentation
+- **Platform SDKs**: Unity, Unreal, Web, Swift, NodeJS built on this Core SDK

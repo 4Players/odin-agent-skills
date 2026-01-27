@@ -1,8 +1,11 @@
-# CLAUDE.md
+---
+name: odin-agent-skills
+description: |
+  Root skill for the ODIN Agent Skills repository. Provides guidance for working with Agent Skills for the ODIN platform by 4Players.
+  Use when: contributing to or maintaining the odin-agent-skills repository, creating new skills, or understanding the repository structure.
+---
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Repository Overview
+# ODIN Agent Skills Repository
 
 This repository contains **Agent Skills** for the ODIN platform by 4Players. Agent Skills are markdown files that provide context and documentation to AI coding assistants (Claude Code, Cursor, GitHub Copilot, VS Code, etc.) following the [Agent Skills specification](https://agentskills.io/specification).
 

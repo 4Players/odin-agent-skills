@@ -140,6 +140,42 @@ odin fleet images list
 odin fleet images list --format="table(id,name,version,os,type)"
 ```
 
+### Update Image
+```bash
+# Update image name and version
+odin fleet images update --image-id=123456 --name="My Updated Image" --version="2.0.0"
+
+# Update Docker image reference
+odin fleet images update --image-id=123456 --docker-image="example/example-image:v2"
+
+# Preview changes without applying (dry-run)
+odin fleet images update --image-id=123456 --name="New Name" --dry-run
+
+# Update with JSON payload
+odin fleet images update --image-id=123456 --payload='{"name":"Updated","version":"2.0"}'
+```
+
+**Update Flags:**
+- `--image-id`: Image ID to update (required)
+- `--name`: New image name
+- `--version`: New version string
+- `--os`: Operating system (linux, windows)
+- `--docker-image`: Full Docker image registry path
+- `--registry-id`: Docker registry identifier
+- `--steam-app-id`: Steam App ID (for Steam images)
+- `--branch`: Steam branch
+- `--password`: Steam branch password
+- `--command`: Launch command
+- `--steamcmd-username`: SteamCMD username
+- `--steamcmd-password`: SteamCMD password
+- `--runtime`: Steam runtime environment
+- `--headful`: Enable headful mode
+- `--request-license`: Request license
+- `--unpublished`: For unpublished Steam apps
+- `--additional-packages`: Additional packages to install
+- `--payload`: JSON payload for bulk updates
+- `--dry-run`: Preview changes without applying
+
 ### Create Docker Image
 ```bash
 # Interactive mode
@@ -373,11 +409,64 @@ odin fleet servers logs \
 - `--timestamps`: Include timestamps
 - `--tail`: Number of lines from end (or "all")
 
+### Start Server
+```bash
+# Start a specific server
+odin fleet servers start --server-id=123456
+
+# Start with automatic confirmation
+odin fleet servers start --server-id=123456 --force
+
+# Interactive mode (prompts for server selection)
+odin fleet servers start
+```
+
+### Stop Server
+```bash
+# Stop a specific server
+odin fleet servers stop --server-id=123456
+
+# Stop with automatic confirmation
+odin fleet servers stop --server-id=123456 --force
+
+# Interactive mode (prompts for server selection)
+odin fleet servers stop
+```
+
+Stopping a server does not delete it. The server can be started again using the `start` command. If the server configuration has persistent data, the data will be preserved.
+
 ### Restart Server
 ```bash
 odin fleet servers restart
 odin fleet servers restart --server-id=123456 --force
 ```
+
+### Start All Servers
+```bash
+# Start all stopped servers for the current app
+odin fleet servers start-all
+
+# Start all with automatic confirmation
+odin fleet servers start-all --force
+```
+
+This command starts all stopped servers across all deployments and locations for the currently selected app.
+
+### Stop All Servers
+```bash
+# Stop all servers for the current app
+odin fleet servers stop-all
+
+# Stop all with automatic confirmation
+odin fleet servers stop-all --force
+
+# Example: Scheduled script for cost optimization
+#!/bin/bash
+odin fleet servers stop-all --force
+echo "All servers stopped at $(date)"
+```
+
+This command stops all servers across all deployments and locations for the currently selected app. Useful for cost optimization during off-peak hours.
 
 ### Backup Management
 
@@ -916,6 +1005,7 @@ odin apps delete                  # Delete app
 odin fleet images list            # List all images
 odin fleet images create          # Create new image
 odin fleet images get             # Get image details
+odin fleet images update          # Update existing image
 odin fleet images delete          # Delete image
 ```
 
@@ -941,8 +1031,12 @@ odin fleet deployments delete     # Delete deployment
 ```bash
 odin fleet servers list           # List all servers
 odin fleet servers get            # Get server details
-odin fleet servers logs           # View server logs
+odin fleet servers start          # Start a stopped server
+odin fleet servers stop           # Stop a running server
 odin fleet servers restart        # Restart server
+odin fleet servers start-all      # Start all servers for the app
+odin fleet servers stop-all       # Stop all servers for the app
+odin fleet servers logs           # View server logs
 odin fleet servers backup create  # Create backup
 odin fleet servers backup restore # Restore backup
 odin fleet servers backup download-url  # Get backup download link

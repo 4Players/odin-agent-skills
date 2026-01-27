@@ -1,90 +1,41 @@
 ---
-name: odin-agent-skills
+name: odin-platform
 description: |
-  Root skill for the ODIN Agent Skills repository. Provides guidance for working with Agent Skills for the ODIN platform by 4Players.
-  Use when: contributing to or maintaining the odin-agent-skills repository, creating new skills, or understanding the repository structure.
+  ODIN platform by 4Players - real-time voice chat, game server hosting, and video conferencing solutions.
+  Use when: building applications with voice chat, deploying game servers, or integrating video conferencing.
 ---
 
-# ODIN Agent Skills Repository
+# ODIN Platform
 
-This repository contains **Agent Skills** for the ODIN platform by 4Players. Agent Skills are markdown files that provide context and documentation to AI coding assistants (Claude Code, Cursor, GitHub Copilot, VS Code, etc.) following the [Agent Skills specification](https://agentskills.io/specification).
+ODIN is a platform by 4Players providing real-time communication and game server infrastructure.
 
-**ODIN Platform Products:**
-- **ODIN Voice**: Cross-platform real-time voice chat SDK
-- **ODIN Fleet**: Game server hosting and deployment platform
-- **ODIN Rooms**: Browser-based video conferencing
+## Products
 
-## Project Structure
+### ODIN Voice
+Cross-platform real-time voice chat SDK for games and applications. Available for:
+- **Unity** (`odin-voice-unity/`) - C# SDK for Unity Engine
+- **Unreal Engine** (`odin-voice-unreal/`) - C++ plugin for Unreal
+- **Web/JavaScript** (`odin-voice-web/`) - Browser-based voice chat
+- **Swift** (`odin-voice-swift/`) - iOS and macOS applications
+- **Node.js** (`odin-voice-nodejs/`) - Server-side voice integration
+- **C/C++** (`odin-voice-core/`) - Native core SDK
 
-```
-odin-agent-skills/
-├── odin-fundamentals/     # Platform basics, auth, pricing
-├── odin-fleet/            # Fleet API and deployment concepts
-├── odin-fleet-cli/        # Fleet CLI tool documentation
-├── odin-rooms/            # Rooms video conferencing
-├── odin-voice-core/       # C/C++ Core SDK
-├── odin-voice-nodejs/     # Node.js SDK
-├── odin-voice-swift/      # iOS/macOS Swift SDK
-├── odin-voice-unity/      # Unity SDK
-├── odin-voice-unreal/     # Unreal Engine SDK
-└── odin-voice-web/        # Web/JavaScript SDK
-```
+### ODIN Fleet
+Game server hosting and deployment platform. Manage dedicated game servers with:
+- **Fleet API** (`odin-fleet/`) - REST API for server management
+- **Fleet CLI** (`odin-fleet-cli/`) - Command-line deployment tool
 
-Each skill folder contains a `SKILL.md` file with YAML frontmatter (`name`, `description`) and comprehensive documentation.
+### ODIN Rooms
+Browser-based video conferencing solution (`odin-rooms/`).
 
-## Skill File Format
+## Platform Fundamentals
 
-Each SKILL.md follows this structure:
+Core concepts, authentication, and pricing are covered in `odin-fundamentals/`.
 
-```markdown
----
-name: skill-name-kebab-case
-description: |
-  Brief description of the skill.
-  Use when: trigger phrases for when this skill should be activated.
----
+## Documentation
 
-# Title
-
-Content with code examples, API references, and best practices.
-```
-
-## Key Conventions
-
-- **Naming**: Use kebab-case for skill folder names
-- **Frontmatter**: Required `name` and `description` fields in YAML
-- **"Use when" triggers**: Include in description to help AI assistants know when to apply the skill
-- **Code examples**: Include practical, copy-pasteable code snippets
-- **Platform-specific**: Each voice SDK has its own skill with platform-appropriate patterns
-
-## Common Tasks
-
-### Adding a New Skill
-
-1. Create a new folder with kebab-case naming: `odin-new-feature/`
-2. Create `SKILL.md` with proper YAML frontmatter
-3. Include comprehensive documentation with code examples
-4. Update `README.md` to list the new skill
-
-### Updating Existing Skills
-
-1. Read the current SKILL.md content
-2. Preserve the YAML frontmatter format
-3. Update documentation while maintaining code example quality
-4. Ensure "Use when" triggers in description remain relevant
-
-### Testing Skills
-
-Skills are text-based documentation files. Verify by:
-- Checking YAML frontmatter parses correctly
-- Ensuring code examples are syntactically valid
-- Confirming links to external documentation are correct
-
-## External Resources
-
-- **ODIN Documentation**: https://docs.4players.io/
-- **Voice SDK Docs**: https://docs.4players.io/voice/
-- **Fleet Docs**: https://docs.4players.io/fleet/
-- **Rooms Docs**: https://docs.4players.io/rooms/
+- **Main Docs**: https://docs.4players.io/
+- **Voice SDK**: https://docs.4players.io/voice/
+- **Fleet**: https://docs.4players.io/fleet/
+- **Rooms**: https://docs.4players.io/rooms/
 - **Discord**: https://4np.de/discord
-- **Agent Skills Spec**: https://agentskills.io/specification

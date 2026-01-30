@@ -5,6 +5,7 @@ description: |
   Use when: setting up ODIN Rooms instances, configuring room settings, understanding Rooms
   architecture, extending Rooms with custom features/bots, or integrating Rooms into custom apps.
   For voice SDK integration in custom apps, use the odin-voice-* skills instead.
+license: MIT
 ---
 
 # ODIN Rooms

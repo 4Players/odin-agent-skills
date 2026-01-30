@@ -17,3 +17,6 @@ ehthumbs.db
 
 # Claude Code local settings
 .claude/
+
+# Agent skills local tools
+.agents/

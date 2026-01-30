@@ -6,7 +6,8 @@ description: |
   Use when: implementing voice chat in Unity projects, handling peer/media events,
   configuring 2D/3D spatial audio, or integrating microphone input.
   CRITICAL: Always determine installed version first - APIs differ significantly.
-  For ODIN concepts, see odin-voice skill.
+  For ODIN concepts, see odin-fundamentals skill.
+license: MIT
 ---
 
 # ODIN Voice Unity SDK

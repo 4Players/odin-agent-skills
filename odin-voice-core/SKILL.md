@@ -6,6 +6,7 @@ description: |
   understanding the underlying ODIN architecture, or creating bindings for other languages.
   Enables seamless integration of real-time voice chat into multiplayer games, applications, and websites.
   This is the base SDK that Unity, Unreal, Web, and Swift SDKs are built upon.
+license: MIT
 ---
 
 # ODIN Voice Core SDK (C/C++)

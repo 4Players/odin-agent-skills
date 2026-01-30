@@ -3,6 +3,7 @@ name: odin-platform
 description: |
   ODIN platform by 4Players - real-time voice chat, game server hosting, and video conferencing solutions.
   Use when: building applications with voice chat, deploying game servers, or integrating video conferencing.
+license: MIT
 ---
 
 # ODIN Platform

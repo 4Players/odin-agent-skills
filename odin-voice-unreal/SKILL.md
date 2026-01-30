@@ -4,7 +4,8 @@ description: |
   ODIN Voice Unreal Engine SDK for real-time voice chat in UE4/UE5 games.
   Use when: implementing voice chat in Unreal projects, working with Blueprint nodes or C++ classes,
   handling room/peer/media events, configuring 3D spatial audio, or integrating audio capture.
-  Requires UE 4.26+. For ODIN concepts, see odin-voice skill.
+  Requires UE 4.26+. For ODIN concepts, see odin-fundamentals skill.
+license: MIT
 ---
 
 # ODIN Voice Unreal SDK

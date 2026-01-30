@@ -9,7 +9,6 @@ These skills follow the open [Agent Skills specification](https://agentskills.io
 | Skill | Description |
 |-------|-------------|
 | **odin-fundamentals** | Platform fundamentals - access keys, tokens, pricing, architecture |
-| **odin-voice** | Core concepts, architecture, authentication, use cases |
 | **odin-voice-unity** | Unity SDK 2.x - OdinRoom, events, 2D/3D spatial audio |
 | **odin-voice-unreal** | Unreal Engine SDK - Blueprints, C++, delegates |
 | **odin-voice-web** | Web/JavaScript SDK - Room, Peer, DeviceManager |
@@ -24,7 +23,13 @@ These skills follow the open [Agent Skills specification](https://agentskills.io
 
 ### Option 1: CLI Tools (Easiest)
 
-Using [ai-agent-skills](https://github.com/skillcreatorai/Ai-Agent-Skills):
+Using [skills.sh](https://skills.sh/):
+
+```bash
+npx @anthropic-ai/skills install 4Players/odin-skills
+```
+
+Or using [ai-agent-skills](https://github.com/skillcreatorai/Ai-Agent-Skills):
 
 ```bash
 npx ai-agent-skills install 4Players/odin-skills

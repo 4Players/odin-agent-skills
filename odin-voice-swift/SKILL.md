@@ -10,6 +10,8 @@ license: MIT
 
 # ODIN Voice Swift SDK (OdinKit)
 
+> **⚠️ DEPRECATION NOTICE:** This documentation refers to an **outdated version** of the ODIN core SDK. OdinKit is subject to be updated with breaking API changes. Please check the official repository for the latest API.
+
 Swift wrapper for real-time VoIP chat on iOS and macOS.
 
 ## Requirements
@@ -23,19 +25,21 @@ Swift wrapper for real-time VoIP chat on iOS and macOS.
 ```swift
 // 1. Create access key (do this on backend in production)
 let accessKey = try OdinAccessKey("YOUR_ACCESS_KEY")
+// Or create a new access key for testing:
+// let accessKey = OdinAccessKey()
 
 // 2. Generate token
 let token = try accessKey.generateToken(roomId: "MyRoom", userId: "user123")
 
 // 3. Create room and set delegate
-let room = OdinRoom()
+let room = try OdinRoom(gateway: "https://gateway.odin.4players.io")
 room.delegate = self
 
 // 4. Join room
 try room.join(token: token)
 
 // 5. Add microphone
-let mediaId = try room.addMedia(type: .Audio)
+try room.addMedia(type: OdinMediaStreamType_Audio)
 ```
 
 ## Key Classes
@@ -64,27 +68,28 @@ Virtual communication space.
 // Properties
 room.id                 // Room identifier
 room.customer           // Customer identifier
-room.userData           // Room user data
-room.connectionStatus   // Current status
-room.peers              // Connected peers
-room.medias             // Audio streams
+room.userData           // Room user data ([UInt8])
+room.connectionStatus   // Current status tuple (state, reason)
+room.peers              // Connected peers dictionary [UInt64: OdinPeer]
+room.medias             // Audio streams dictionary
 room.ownPeer            // Self reference
 
 // Observable (Combine)
 room.$connectionStatus  // Published status
+room.$userData          // Published user data
 room.$peers             // Published peers
 room.$medias            // Published medias
 
 // Methods
 try room.join(token: token)
 room.leave()
-let mediaId = try room.addMedia(type: .Audio)
-try room.removeMedia(streamHandle: mediaId)
-try room.updateUserData(userData: bytes, target: .Peer)
+try room.addMedia(type: OdinMediaStreamType_Audio)
+try room.addMedia(audioConfig: OdinAudioStreamConfig(sample_rate: 48000, channel_count: 1))
+try room.updatePeerUserData(userData: bytes)
 try room.updatePosition(x: 100, y: 50)
 room.setPositionScale(scale: 1.0)
-try room.sendMessage(data: bytes, targetIds: [])
-room.setAudioAutopilotMode(.Room)
+try room.sendMessage(data: bytes)                      // Broadcast to all
+try room.sendMessage(data: bytes, targetIds: [1, 2])   // Send to specific peers
 ```
 
 ### OdinPeer
@@ -137,44 +142,43 @@ Implement `OdinRoomDelegate`:
 class VoiceManager: OdinRoomDelegate {
     func onRoomConnectionStateChanged(room: OdinRoom, oldState: OdinRoomConnectionState,
                                        newState: OdinRoomConnectionState, reason: OdinRoomConnectionStateChangeReason) {
-        print("Connection: \(oldState) → \(newState)")
+        print("Connection: \(oldState.rawValue) → \(newState.rawValue)")
     }
 
-    func onRoomJoined(room: OdinRoom, ownPeer: OdinPeer) {
-        print("Joined as peer \(ownPeer.id)")
+    func onRoomJoined(room: OdinRoom) {
+        print("Joined as peer \(room.ownPeer.id)")
     }
 
     func onPeerJoined(room: OdinRoom, peer: OdinPeer) {
-        print("Peer joined: \(peer.userId)")
+        print("Peer \(peer.id) joined with userId '\(peer.userId)'")
     }
 
     func onPeerLeft(room: OdinRoom, peer: OdinPeer) {
-        print("Peer left: \(peer.userId)")
+        print("Peer \(peer.id) left")
     }
 
     func onMediaAdded(room: OdinRoom, peer: OdinPeer, media: OdinMedia) {
-        print("Media added from \(peer.userId)")
+        print("Peer \(peer.id) added media \(media.id)")
     }
 
     func onMediaRemoved(room: OdinRoom, peer: OdinPeer, media: OdinMedia) {
-        print("Media removed from \(peer.userId)")
+        print("Peer \(peer.id) removed media \(media.id)")
     }
 
     func onMediaActiveStateChanged(room: OdinRoom, peer: OdinPeer, media: OdinMedia) {
-        print("\(peer.userId) is \(media.activityStatus ? "speaking" : "silent")")
+        print("Peer \(peer.id) \(media.activityStatus ? "started" : "stopped") talking on media \(media.id)")
     }
 
     func onMessageReceived(room: OdinRoom, senderId: UInt64, data: [UInt8]) {
-        let text = String(bytes: data, encoding: .utf8) ?? ""
-        print("Message: \(text)")
+        print("Peer \(senderId) sent message: \(data)")
     }
 
     func onRoomUserDataChanged(room: OdinRoom) {
-        print("Room data updated")
+        print("Room data updated: \(room.userData)")
     }
 
     func onPeerUserDataChanged(room: OdinRoom, peer: OdinPeer) {
-        print("Peer \(peer.userId) data updated")
+        print("Peer \(peer.id) data updated: \(peer.userData)")
     }
 }
 ```
@@ -184,43 +188,45 @@ class VoiceManager: OdinRoomDelegate {
 ```swift
 import Combine
 
-var cancellables = Set<AnyCancellable>()
+// Monitor the room connection status
+room.$connectionStatus.sink {
+    print("New Connection Status: \($0.state.rawValue)")
+}
 
-room.$connectionStatus
-    .sink { status in
-        print("Status: \(status)")
-    }
-    .store(in: &cancellables)
+// Monitor the room user data
+room.$userData.sink {
+    print("New User Data: \($0)")
+}
 
-room.$peers
-    .sink { peers in
-        print("Peers: \(peers.count)")
-    }
-    .store(in: &cancellables)
+// Monitor the list of peers in the room
+room.$peers.sink {
+    print("New Peers: \($0.keys)")
+}
+
+// Monitor the list of media streams in the room
+room.$medias.sink {
+    print("New Medias: \($0.keys)")
+}
 ```
 
 ## Audio Processing (APM)
 
 ```swift
-var apmConfig = OdinApmConfig()
-
-// Voice Activity Detection
-apmConfig.voiceActivityDetection = true
-apmConfig.vadAttackProbability = 0.9
-apmConfig.vadReleaseProbability = 0.8
-
-// Volume Gate
-apmConfig.volumeGate = true
-apmConfig.volumeGateAttackThreshold = -30  // dBFS
-apmConfig.volumeGateReleaseThreshold = -40
-
-// Audio Processing
-apmConfig.echoCancellation = true
-apmConfig.noiseSuppression = .Moderate  // or .Aggressive, .VeryAggressive
-apmConfig.highPassFilter = true
-apmConfig.preamplifier = false
-apmConfig.transientSuppression = true
-apmConfig.gainController = .V2
+// Create APM config with all settings
+let apmConfig = OdinApmConfig(
+    voice_activity_detection: true,
+    voice_activity_detection_attack_probability: 0.9,
+    voice_activity_detection_release_probability: 0.8,
+    volume_gate: true,
+    volume_gate_attack_loudness: -30,   // dBFS
+    volume_gate_release_loudness: -40,
+    echo_canceller: true,
+    high_pass_filter: true,
+    pre_amplifier: false,
+    noise_suppression_level: OdinNoiseSuppressionLevel_Moderate,  // or _Low, _High, _VeryHigh
+    transient_suppressor: true,
+    gain_controller: true
+)
 
 // Apply config
 try room.updateAudioConfig(apmConfig)
@@ -230,24 +236,29 @@ try room.updateAudioConfig(apmConfig)
 
 ### Setting User Data
 ```swift
-// Using OdinCustomData helper
-let userData = try OdinCustomData.encode(["name": "Alice", "level": 10])
-try room.updateUserData(userData: userData, target: .Peer)
+// Using OdinCustomData helper with a String
+let stringData = OdinCustomData.encode("Hello World!")
+try room.updatePeerUserData(userData: stringData)
 
-// Reading user data
-if let data = peer.userData {
-    let decoded = try OdinCustomData.decode(data) as [String: Any]
-    let name = decoded["name"] as? String
+// Using OdinCustomData helper with a Codable type
+struct PlayerData: Codable {
+    var name: String
+    var level: Int
 }
+let playerData = OdinCustomData.encode(PlayerData(name: "Alice", level: 10))
+try room.updatePeerUserData(userData: playerData)
+
+// Reading user data (peer.userData is [UInt8])
+let decoded: PlayerData? = OdinCustomData.decode(peer.userData)
 ```
 
 ### Sending Messages
 ```swift
-// Broadcast to all
-let message = Array("Hello everyone!".utf8)
-try room.sendMessage(data: message, targetIds: [])
+// Broadcast to all peers in the room
+let message = OdinCustomData.encode("Hello everyone!")
+try room.sendMessage(data: message)
 
-// Send to specific peers
+// Send to specific peers by ID
 try room.sendMessage(data: message, targetIds: [peer1.id, peer2.id])
 ```
 
@@ -270,13 +281,11 @@ room.setPositionScale(scale: 1.0)
 OdinKit integrates with AVAudioEngine:
 
 ```swift
-// Access audio nodes for mixing
-let roomAudioNode = room.audioNode
-let mediaAudioNode = media.audioNode
-
-// Custom sample rate
-let config = OdinAudioStreamConfig(sampleRate: 48000)
-let mediaId = try room.addMedia(audioConfig: config)
+// Custom sample rate and channel configuration
+try room.addMedia(audioConfig: OdinAudioStreamConfig(
+    sample_rate: 48000,
+    channel_count: 1
+))
 ```
 
 ## SwiftUI Example

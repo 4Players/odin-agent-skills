@@ -308,7 +308,7 @@ Use the ODIN Web Client at https://4players.app for cross-platform testing:
 
 ## Troubleshooting
 
-See [references/troubleshooting.md](../references/troubleshooting.md) for common issues.
+See [voice-unity-troubleshooting.md](voice-unity-troubleshooting.md) for common issues.
 
 ## Documentation Links
 

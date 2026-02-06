@@ -470,7 +470,7 @@ Import from Package Manager:
 
 ## Troubleshooting
 
-See [references/troubleshooting.md](../references/troubleshooting.md) for common issues.
+See [voice-unity-troubleshooting.md](voice-unity-troubleshooting.md) for common issues.
 
 ### v2.x Specific Issues
 

@@ -1,12 +1,3 @@
----
-name: odin-voice-swift
-description: |
-  ODIN Voice Swift SDK (OdinKit) for real-time voice chat in iOS and macOS apps.
-  Use when: implementing voice chat in Swift/SwiftUI projects, working with OdinRoom/OdinPeer classes,
-  handling delegates or Combine publishers, configuring audio processing.
-  Requires iOS 9+/macOS 10.15+, Swift 5.0+. For ODIN concepts, see odin-fundamentals skill.
-license: MIT
----
 
 # ODIN Voice Swift SDK (OdinKit)
 

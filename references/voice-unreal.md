@@ -1,12 +1,3 @@
----
-name: odin-voice-unreal
-description: |
-  ODIN Voice Unreal Engine SDK for real-time voice chat in UE4/UE5 games.
-  Use when: implementing voice chat in Unreal projects, working with Blueprint nodes or C++ classes,
-  handling room/peer events, configuring spatial audio, or integrating audio capture.
-  Requires UE 4.26+ (v1.x) or UE 5.3+ (v2.x). Check versions/ for v1.x vs v2.x specific documentation.
-license: MIT
----
 
 # ODIN Voice Unreal SDK
 
@@ -20,8 +11,8 @@ Unreal Engine plugin for real-time voice chat with full Blueprint and C++ suppor
 
 | Version | Status               | Documentation                    |
 | ------- | -------------------- | -------------------------------- |
-| **2.x** | Current, Recommended | [versions/v2.md](versions/v2.md) |
-| **1.x** | Legacy, Maintenance  | [versions/v1.md](versions/v1.md) |
+| **2.x** | Current, Recommended | [voice-unreal-v2.md](voice-unreal-v2.md) |
+| **1.x** | Legacy, Maintenance  | [voice-unreal-v1.md](voice-unreal-v1.md) |
 
 ### Which Version Should I Use?
 
@@ -81,9 +72,9 @@ git lfs checkout
 
 ## Documentation
 
-- **2.x Full Documentation**: [versions/v2.md](versions/v2.md)
-- **1.x Documentation**: [versions/v1.md](versions/v1.md)
-- **Troubleshooting**: [references/troubleshooting.md](references/troubleshooting.md)
+- **2.x Full Documentation**: [voice-unreal-v2.md](voice-unreal-v2.md)
+- **1.x Documentation**: [voice-unreal-v1.md](voice-unreal-v1.md)
+- **Troubleshooting**: [voice-unreal-troubleshooting.md](voice-unreal-troubleshooting.md)
 - **Online Docs**: https://docs.4players.io/voice/unreal/
 - **Blueprint Reference**: https://docs.4players.io/voice/unreal/blueprint-reference/
 - **GitHub**: https://github.com/4Players/odin-sdk-unreal

@@ -1,14 +1,3 @@
----
-name: odin-voice-web
-description: |
-  ODIN Voice Web SDK - Browser SDK for real-time voice chat with WebTransport/HTTP3.
-  Use when: implementing voice chat in web apps, browsers, or web-based applications,
-  working with Room/Peer/AudioInput/AudioOutput classes, handling audio events,
-  configuring audio input/output devices, or integrating with React/Angular/Vue frameworks.
-  Supports NPM and CDN. Enables seamless voice communication in multiplayer games,
-  social platforms, collaboration tools, and interactive web experiences.
-license: MIT
----
 
 # ODIN Voice Web SDK
 
@@ -370,9 +359,9 @@ room.onVideoOutputStarted = async (payload) => {
 
 ## Additional Documentation
 
-- **Audio Processing (APM)**: See [references/audio-processing.md](references/audio-processing.md) for presets and dBFS tuning
-- **Framework Integration**: See [references/framework-integration.md](references/framework-integration.md) for React, Vue, Angular examples
-- **Advanced Patterns**: See [references/advanced-patterns.md](references/advanced-patterns.md) for push-to-talk, reconnection, device selection
+- **Audio Processing (APM)**: See [voice-web-audio-processing.md](voice-web-audio-processing.md) for presets and dBFS tuning
+- **Framework Integration**: See [voice-web-frameworks.md](voice-web-frameworks.md) for React, Vue, Angular examples
+- **Advanced Patterns**: See [voice-web-advanced.md](voice-web-advanced.md) for push-to-talk, reconnection, device selection
 
 ## Troubleshooting
 

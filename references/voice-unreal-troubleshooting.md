@@ -51,7 +51,7 @@ Enable audio processing features:
 - Echo Cancellation
 - High Pass Filter
 
-See [v1.md](../versions/v1.md#apm-settings-reference) or [v2.md](../versions/v2.md#audio-pipeline-configuration) for APM configuration details.
+See [voice-unreal-v1.md](voice-unreal-v1.md#apm-settings-reference) or [voice-unreal-v2.md](voice-unreal-v2.md#audio-pipeline-configuration) for APM configuration details.
 
 ## Platform-Specific Issues
 

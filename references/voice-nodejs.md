@@ -1,13 +1,3 @@
----
-name: odin-voice-nodejs
-description: |
-  ODIN Voice NodeJS SDK - Server-side voice chat SDK with native C++ bindings.
-  Use when: building recording bots, AI voice assistants, server-side audio processing,
-  content moderation systems, or any Node.js application requiring real-time voice chat.
-  Enables high-quality real-time voice communication with end-to-end encryption,
-  3D positional audio, and raw PCM audio access for processing.
-license: MIT
----
 
 # ODIN Voice NodeJS SDK
 
@@ -189,7 +179,7 @@ try {
 
 ## Additional Documentation
 
-- **Audio Patterns**: See [references/audio-patterns.md](references/audio-patterns.md) for recording bots, AI assistants, multi-room bots
+- **Audio Patterns**: See [voice-nodejs-audio.md](voice-nodejs-audio.md) for recording bots, AI assistants, multi-room bots
 
 ## Resources
 

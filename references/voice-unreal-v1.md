@@ -317,7 +317,7 @@ Wwise Adapter Plugin available for integrating ODIN with Wwise audio engine.
 
 ## Troubleshooting
 
-See [references/troubleshooting.md](../references/troubleshooting.md) for common issues.
+See [voice-unreal-troubleshooting.md](voice-unreal-troubleshooting.md) for common issues.
 
 ### v1.x Specific Issues
 

@@ -1,12 +1,3 @@
----
-name: odin-fleet
-description: |
-  ODIN Fleet platform for deploying and managing game servers globally. Use when: deploying dedicated
-  servers, integrating with matchmaking systems (GameLift FlexMatch, Nakama), building server browsers,
-  configuring Docker/Steamworks servers, managing resources and scaling, implementing CI/CD pipelines,
-  or automating server lifecycle management via API/SDK. Engine-agnostic platform supporting any game engine.
-license: MIT
----
 
 # ODIN Fleet Platform
 
@@ -179,7 +170,7 @@ Full API docs: https://fleet.4players.io/docs/api
 
 ## CLI Tool
 
-See the **odin-fleet-cli** skill for CLI-specific documentation.
+See [fleet-cli.md](fleet-cli.md) for CLI-specific documentation.
 
 ```bash
 odin login --api-key=$API_KEY
@@ -191,8 +182,8 @@ odin fleet servers list --format="table(id,addr,status.state)"
 
 ## Additional Documentation
 
-- **Matchmaking**: See [references/matchmaking.md](references/matchmaking.md) for GameLift FlexMatch, Nakama, custom matchmaking
-- **Deployment Patterns**: See [references/deployment-patterns.md](references/deployment-patterns.md) for CI/CD, blue-green, best practices
+- **Matchmaking**: See [fleet-matchmaking.md](fleet-matchmaking.md) for GameLift FlexMatch, Nakama, custom matchmaking
+- **Deployment Patterns**: See [fleet-deployment.md](fleet-deployment.md) for CI/CD, blue-green, best practices
 
 ## Troubleshooting
 

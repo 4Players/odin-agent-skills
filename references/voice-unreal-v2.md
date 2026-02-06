@@ -471,7 +471,7 @@ Key changes:
 
 ## Troubleshooting
 
-See [references/troubleshooting.md](../references/troubleshooting.md) for common issues.
+See [voice-unreal-troubleshooting.md](voice-unreal-troubleshooting.md) for common issues.
 
 ### v2.x Specific Issues
 

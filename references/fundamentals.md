@@ -1,14 +1,3 @@
----
-name: odin-fundamentals
-description: |
-  ODIN Platform Fundamentals - Core concepts, architecture, authentication, and pricing.
-  Use when: learning about ODIN platform basics, understanding access keys vs tokens,
-  exploring pricing tiers, understanding room-based architecture, working with authentication,
-  or getting overview of ODIN Voice/Fleet/Rooms products. Covers platform fundamentals,
-  authentication workflows, security best practices, and billing models for developers
-  integrating real-time voice/video communication or game server hosting.
-license: MIT
----
 
 # ODIN Platform Fundamentals
 
@@ -125,7 +114,7 @@ await room.join(token, { gateway: 'https://gateway.odin.4players.io' });
 
 **Voice Pricing (Pro):** €0.19–€0.29 per Peak Concurrent User based on volume.
 
-See [references/pricing-details.md](references/pricing-details.md) for full breakdown.
+See [pricing.md](pricing.md) for full breakdown.
 
 ## Core Concepts
 
@@ -206,8 +195,8 @@ await room.join(token, { gateway: 'https://gateway.odin.4players.io' });
 
 ## Additional Documentation
 
-- **Pricing Details**: See [references/pricing-details.md](references/pricing-details.md)
-- **Integration Patterns**: See [references/integration-patterns.md](references/integration-patterns.md) for push-to-talk, reconnection, multi-room
+- **Pricing Details**: See [pricing.md](pricing.md)
+- **Integration Patterns**: See [integration-patterns.md](integration-patterns.md) for push-to-talk, reconnection, multi-room
 
 ## Resources
 
@@ -228,4 +217,4 @@ ODIN provides a complete platform for real-time voice communication and game ser
 - Cross-Platform (unified API)
 - Enterprise Security (JWT auth, server-side keys)
 
-For platform-specific implementation, refer to the corresponding SDK skill (odin-voice-web, odin-voice-unity, odin-voice-unreal, etc.).
+For platform-specific implementation, refer to the corresponding SDK reference (voice-web, voice-unity, voice-unreal, etc.).

@@ -1,14 +1,3 @@
----
-name: odin-voice-unity
-description: |
-  ODIN Voice Unity SDK for real-time voice chat in Unity games and XR experiences.
-  Supports both 1.x (stable, Unity 2019.4+) and 2.x (beta, Unity 2021.4+) versions.
-  Use when: implementing voice chat in Unity projects, handling peer/media events,
-  configuring 2D/3D spatial audio, or integrating microphone input.
-  Check versions/ for v1.x vs v2.x specific documentation.
-  For ODIN concepts, see odin-fundamentals skill.
-license: MIT
----
 
 # ODIN Voice Unity SDK
 
@@ -22,8 +11,8 @@ Unity SDK for real-time 3D positional voice chat integration.
 
 | Version | Status               | Documentation                    |
 | ------- | -------------------- | -------------------------------- |
-| **1.x** | Current, Stable      | [versions/v1.md](versions/v1.md) |
-| **2.x** | Pre-release Beta     | [versions/v2.md](versions/v2.md) |
+| **1.x** | Current, Stable      | [voice-unity-v1.md](voice-unity-v1.md) |
+| **2.x** | Pre-release Beta     | [voice-unity-v2.md](voice-unity-v2.md) |
 
 ### Which Version Should I Use?
 
@@ -84,9 +73,9 @@ Or download `.unitypackage` from [GitHub releases](https://github.com/4Players/o
 
 ## Documentation
 
-- **1.x Full Documentation**: [versions/v1.md](versions/v1.md)
-- **2.x Full Documentation**: [versions/v2.md](versions/v2.md)
-- **Troubleshooting**: [references/troubleshooting.md](references/troubleshooting.md)
+- **1.x Full Documentation**: [voice-unity-v1.md](voice-unity-v1.md)
+- **2.x Full Documentation**: [voice-unity-v2.md](voice-unity-v2.md)
+- **Troubleshooting**: [voice-unity-troubleshooting.md](voice-unity-troubleshooting.md)
 - **Online Docs (1.x)**: https://docs.4players.io/voice/unity/
 - **Online Docs (2.x)**: https://docs.4players.io/voice/unity/next/
 - **GitHub**: https://github.com/4Players/odin-sdk-unity

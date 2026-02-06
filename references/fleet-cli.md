@@ -1,13 +1,3 @@
----
-name: odin-fleet-cli
-description: |
-  ODIN Fleet CLI tool for managing game servers, creating resources, and building CI/CD pipelines.
-  Use when: automating fleet deployments, scripting server management, creating images/configs/deployments,
-  filtering and formatting CLI output, building CI/CD pipelines, managing backups, viewing logs,
-  or working with Fleet API via command line. Covers all CLI commands, output formatting, filters,
-  and automation best practices.
-license: MIT
----
 
 # ODIN Fleet CLI
 
@@ -197,8 +187,8 @@ odin fleet locations list
 
 ## Additional Documentation
 
-- **CI/CD Integration**: See [references/cicd-integration.md](references/cicd-integration.md) for GitHub Actions, GitLab CI examples
-- **Advanced Patterns**: See [references/advanced-patterns.md](references/advanced-patterns.md) for blue-green deployments, monitoring scripts
+- **CI/CD Integration**: See [fleet-cli-cicd.md](fleet-cli-cicd.md) for GitHub Actions, GitLab CI examples
+- **Advanced Patterns**: See [fleet-cli-advanced.md](fleet-cli-advanced.md) for blue-green deployments, monitoring scripts
 
 ## Resources
 

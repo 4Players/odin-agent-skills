@@ -1,13 +1,3 @@
----
-name: odin-voice-core
-description: |
-  ODIN Voice Core SDK (C/C++) - the low-level foundation for all ODIN SDKs.
-  Use when: building custom platform integrations, working with C/C++ directly,
-  understanding the underlying ODIN architecture, or creating bindings for other languages.
-  Enables seamless integration of real-time voice chat into multiplayer games and applications.
-  This is the base SDK that Unity, Unreal, Web, and Swift SDKs are built upon.
-license: MIT
----
 
 # ODIN Voice Core SDK (C/C++)
 
@@ -21,8 +11,8 @@ Low-level C API foundation for all ODIN Voice SDKs, enabling real-time voice cha
 
 | Version | Status               | Documentation                    |
 | ------- | -------------------- | -------------------------------- |
-| **2.x** | Current, Recommended | [versions/v2.md](versions/v2.md) |
-| **1.x** | Legacy, Maintenance  | [versions/v1.md](versions/v1.md) |
+| **2.x** | Current, Recommended | [voice-core-v2.md](voice-core-v2.md) |
+| **1.x** | Legacy, Maintenance  | [voice-core-v1.md](voice-core-v1.md) |
 
 ### Which Version Should I Use?
 
@@ -64,7 +54,7 @@ git lfs checkout
 
 ## Documentation
 
-- **2.x Full Documentation**: [versions/v2.md](versions/v2.md)
-- **1.x Documentation**: [versions/v1.md](versions/v1.md)
+- **2.x Full Documentation**: [voice-core-v2.md](voice-core-v2.md)
+- **1.x Documentation**: [voice-core-v1.md](voice-core-v1.md)
 - **Online Docs**: https://docs.4players.io/voice/core/
 - **Platform SDKs**: Unity, Unreal, Web, Swift, NodeJS (built on this Core SDK)

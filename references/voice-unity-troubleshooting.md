@@ -56,8 +56,8 @@ Enable audio processing features:
 - High Pass Filter
 
 See version-specific documentation:
-- [v1.md](../versions/v1.md) for room-level APM
-- [v2.md](../versions/v2.md) for audio pipeline effects
+- [voice-unity-v1.md](voice-unity-v1.md) for room-level APM
+- [voice-unity-v2.md](voice-unity-v2.md) for audio pipeline effects
 
 ### No Audio from Remote Peers
 

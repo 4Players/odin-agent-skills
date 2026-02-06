@@ -1,12 +1,3 @@
----
-name: odin-rooms
-description: |
-  ODIN Rooms - decentralized virtual meeting rooms platform built on ODIN Voice and Fleet.
-  Use when: setting up ODIN Rooms instances, configuring room settings, understanding Rooms
-  architecture, extending Rooms with custom features/bots, or integrating Rooms into custom apps.
-  For voice SDK integration in custom apps, use the odin-voice-* skills instead.
-license: MIT
----
 
 # ODIN Rooms
 
@@ -323,7 +314,7 @@ For participants to connect to the same room, these must match:
 - **Bots**: Recording, transcription, AI features
 - **Custom UIs**: Build your own interface
 - **Integrations**: External automations, webhooks
-- **Communicator Widget**: Drop-in voice chat widget (see `odin-voice-web` skill)
+- **Communicator Widget**: Drop-in voice chat widget (see [voice-web.md](voice-web.md))
 
 ## Technical Details
 
@@ -369,7 +360,7 @@ ODIN Rooms = ODIN Voice SDK + ODIN Fleet + Web UI
 - **Discord Support**: https://4np.de/discord
 - **Email Support**: support@4players.io
 
-For custom integrations, bots, or advanced features, refer to the ODIN Voice SDK documentation and related skills:
-- Web apps: `odin-voice-web` skill
-- Unity games: `odin-voice-unity` skill
-- Unreal games: `odin-voice-unreal` skill
+For custom integrations, bots, or advanced features, refer to the ODIN Voice SDK documentation:
+- Web apps: [voice-web.md](voice-web.md)
+- Unity games: [voice-unity.md](voice-unity.md)
+- Unreal games: [voice-unreal.md](voice-unreal.md)

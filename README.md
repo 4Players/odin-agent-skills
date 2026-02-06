@@ -27,7 +27,7 @@ This skill follows the open [Agent Skills specification](https://agentskills.io/
 Using [skills.sh](https://skills.sh/):
 
 ```bash
-npx @anthropic-ai/skills install 4Players/odin-agent-skills
+npx skills install 4Players/odin-agent-skills
 ```
 
 Or using [ai-agent-skills](https://github.com/skillcreatorai/Ai-Agent-Skills):

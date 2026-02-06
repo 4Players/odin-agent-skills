@@ -4,8 +4,10 @@ Configure advanced audio processing for optimal voice quality.
 
 ## Complete Configuration
 
+All settings are optional. Only specify the ones you want to override; unset properties will use their defaults.
+
 ```javascript
-const audioInput = await ODIN.DeviceManager.createAudioInput(null, {
+const audioInput = await ODIN.DeviceManager.createAudioInput({}, {
     // Volume control
     volume: 1,                  // 0-2 (0=mute, 1=normal, 2=boost)
 
@@ -46,69 +48,3 @@ await audioInput.setInputSettings({
     echoCanceller: !currentSettings.echoCanceller
 });
 ```
-
-## Recommended Presets
-
-### Gaming (Low Latency)
-
-```javascript
-{
-    echoCanceller: true,
-    noiseSuppression: true,
-    gainController: true,
-    voiceActivity: {
-        attackThreshold: 0.85,
-        releaseThreshold: 0.75,
-    },
-    volumeGate: {
-        attackThreshold: -35,
-        releaseThreshold: -45,
-    }
-}
-```
-
-### Podcasting (High Quality)
-
-```javascript
-{
-    echoCanceller: false,       // Use hardware echo cancellation
-    noiseSuppression: true,
-    gainController: true,
-    voiceActivity: {
-        attackThreshold: 0.95,
-        releaseThreshold: 0.90,
-    },
-    volumeGate: {
-        attackThreshold: -25,
-        releaseThreshold: -35,
-    }
-}
-```
-
-### Noisy Environment
-
-```javascript
-{
-    echoCanceller: true,
-    noiseSuppression: true,
-    gainController: true,
-    voiceActivity: {
-        attackThreshold: 0.95,  // Higher threshold = less false positives
-        releaseThreshold: 0.90,
-    },
-    volumeGate: {
-        attackThreshold: -20,   // Higher gate = blocks more noise
-        releaseThreshold: -30,
-    }
-}
-```
-
-## Understanding dBFS Values
-
-- **0 dBFS**: Maximum possible level (digital clipping)
-- **-6 dBFS**: Loud speaking
-- **-12 dBFS**: Normal speaking
-- **-20 dBFS**: Quiet speaking
-- **-30 dBFS**: Whisper
-- **-40 dBFS**: Very quiet background noise
-- **-50+ dBFS**: Silence/noise floor

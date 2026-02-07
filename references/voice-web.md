@@ -1,3 +1,14 @@
+---
+name: odin-voice-web
+description: |
+  ODIN Voice Web SDK - Browser SDK for real-time voice chat with WebTransport/HTTP3.
+  Use when: implementing voice chat in web apps, browsers, or web-based applications,
+  working with Room/Peer/AudioInput/AudioOutput classes, handling audio events,
+  configuring audio input/output devices, or integrating with React/Angular/Vue frameworks.
+  Supports NPM and CDN. Enables seamless voice communication in multiplayer games,
+  social platforms, collaboration tools, and interactive web experiences.
+license: MIT
+---
 
 # ODIN Voice Web SDK
 
@@ -7,98 +18,86 @@ Browser SDK for real-time voice chat with WebTransport/HTTP3 and WebRTC fallback
 
 ### NPM (Recommended)
 
-Install both core packages:
+Install the core package:
 
 ```bash
-npm install @4players/odin @4players/odin-plugin-web
+npm install @4players/odin
 ```
 
-**For TypeScript projects**: Type definitions are included automatically.
+**For TypeScript projects**: Type definitions are included automatically. The audio plugin (`@4players/odin-plugin-web`) is included as a dependency and will be loaded automatically when needed.
 
 ### CDN (Browser-only)
 
 > **Warning**: Using `latest` in the CDN URL (e.g. `.../latest/odin-sdk.js`) means your app automatically picks up new releases, including breaking changes. We recommend pinning a specific version to avoid unexpected issues:
+>
 > ```
-> https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-sdk.js
-> https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-plugin.js
+> https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.js
+> https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-plugin.js
 > ```
 >
 > **Note**: Check npm for the latest available versions:
+>
 > - SDK: https://www.npmjs.com/package/@4players/odin-sdk
 > - Plugin: https://www.npmjs.com/package/@4players/odin-plugin
 
 **IIFE (Global Variables)**:
+
 ```html
-<script src="https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-sdk.js"></script>
-<script src="https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-plugin.js"></script>
+<script src="https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.js"></script>
 <script>
-  // Access via global ODIN and ODIN_PLUGIN objects
+  // Access via global ODIN object
   console.log(ODIN.Room);
 </script>
 ```
 
 **ESM (ES Modules)**:
+
 ```html
 <script type="module">
-  import * as ODIN from 'https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-sdk.esm.js';
-  import * as ODIN_PLUGIN from 'https://cdn.odin.4players.io/client/js/sdk/1.3.12/odin-plugin.esm.js';
+  import * as ODIN from "https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.esm.js";
 </script>
 ```
 
 ## Quick Start
 
 ```javascript
-import * as ODIN from '@4players/odin';
-import * as ODIN_PLUGIN from '@4players/odin-plugin-web';
+import * as ODIN from "@4players/odin";
 
-let audioPlugin;
 let room;
 let audioInput;
 
-// Step 1: Initialize plugin (call once per application, requires user interaction)
-async function initPlugin() {
-    if (audioPlugin) return audioPlugin;
-
-    audioPlugin = ODIN_PLUGIN.createPlugin(async (sampleRate) => {
-        const audioContext = new AudioContext({ sampleRate });
-        await audioContext.resume();
-        return audioContext;
-    });
-
-    ODIN.init(audioPlugin);
-    return audioPlugin;
-}
-
-// Step 2: Join voice room (call from button click or user interaction)
+// Step 1: Join voice room (call from button click or user interaction)
 async function joinRoom(token) {
-    await initPlugin();
+  room = new ODIN.Room();
+  setupEventHandlers(room);
 
-    room = new ODIN.Room();
-    setupEventHandlers(room);
+  await ODIN.setOutputDevice({});
+  await room.join(token, { gateway: "https://gateway.odin.4players.io" });
 
-    await audioPlugin.setOutputDevice({});
-    await room.join(token, { gateway: 'https://gateway.odin.4players.io' });
-
-    audioInput = await ODIN.DeviceManager.createAudioInput();
-    await room.addAudioInput(audioInput);
+  audioInput = await ODIN.DeviceManager.createAudioInput();
+  await room.addAudioInput(audioInput);
 }
 
-// Step 3: Setup event handlers
+// Step 2: Setup event handlers
 function setupEventHandlers(room) {
-    room.onJoined = (payload) => console.log(`Joined! Own peer ID: ${payload.peer.id}`);
-    room.onLeft = () => console.log('Left room');
-    room.onPeerJoined = (payload) => console.log(`Peer joined: ${payload.peer.userId}`);
-    room.onPeerLeft = (payload) => console.log(`Peer left: ${payload.peer.userId}`);
-    room.onAudioOutputStarted = (payload) => console.log(`Audio from: ${payload.peer.userId}`);
+  room.onJoined = (payload) =>
+    console.log(`Joined! Own peer ID: ${payload.peer.id}`);
+  room.onLeft = () => console.log("Left room");
+  room.onPeerJoined = (payload) =>
+    console.log(`Peer joined: ${payload.peer.userId}`);
+  room.onPeerLeft = (payload) =>
+    console.log(`Peer left: ${payload.peer.userId}`);
+  room.onAudioOutputStarted = (payload) =>
+    console.log(`Audio from: ${payload.peer.userId}`);
 }
 
-// Step 4: Leave room when done
+// Step 3: Leave room when done
 async function leaveRoom() {
-    if (audioInput) {
-        room.removeAudioInput(audioInput);
-        audioInput.close();
-    }
-    if (room) room.leave();
+  if (audioInput) {
+    room.removeAudioInput(audioInput);
+    audioInput.close();
+  }
+  if (room) room.leave();
 }
 ```
 
@@ -106,7 +105,7 @@ async function leaveRoom() {
 
 - **User Interaction**: Modern browsers require direct user interaction (click/tap) to start AudioContext
 - **Event Registration**: Register all event handlers BEFORE calling `room.join()`
-- **Output Device**: `await audioPlugin.setOutputDevice({})` MUST be called BEFORE `room.join()` to hear other peers. After the initial call it can be used at any time to switch the output device.
+- **Output Device**: `await setOutputDevice({})` MUST be called BEFORE `room.join()` to hear other peers. After the initial call it can be used at any time to switch the output device.
 - **Audio Activation**: Audio is only transmitted after calling `room.addAudioInput(audioInput)`
 
 ## Core Classes
@@ -137,13 +136,13 @@ await room.sendMessage(message, targetPeerIds?)
 
 ```javascript
 // Properties
-peer.id         // Number: Peer ID
-peer.userId     // String: User identifier from token
-peer.data       // Uint8Array: Custom user data
+peer.id; // Number: Peer ID
+peer.userId; // String: User identifier from token
+peer.data; // Uint8Array: Custom user data
 
 // Methods
-peer.setVolume(value)           // 0-2 or "muted"
-await peer.sendMessage(message) // RemotePeer only
+peer.setVolume(value); // 0-2 or "muted"
+await peer.sendMessage(message); // RemotePeer only
 ```
 
 ### AudioInput
@@ -169,7 +168,7 @@ To mute, use `'muted'` instead of `0` -- this stops the underlying MediaStream s
 
 ```javascript
 // Mute: stops MediaStream, removes browser recording indicator
-await audioInput.setVolume('muted');
+await audioInput.setVolume("muted");
 
 // Unmute: restores capture at full volume
 await audioInput.setVolume(1);
@@ -180,7 +179,7 @@ For a full mute that also stops the encoder (saving resources), remove the Audio
 ```javascript
 // Full mute: stop encoder + stop MediaStream
 room.removeAudioInput(audioInput);
-await audioInput.setVolume('muted');
+await audioInput.setVolume("muted");
 
 // Unmute: restore volume and re-add to room to resume encoding
 await audioInput.setVolume(1);
@@ -202,11 +201,13 @@ All events support two patterns. Register handlers BEFORE calling `room.join()`:
 
 ```javascript
 // Pattern 1: Property assignment (single handler)
-room.onPeerJoined = (payload) => { /* ... */ };
+room.onPeerJoined = (payload) => {
+  /* ... */
+};
 
 // Pattern 2: addEventListener (multiple handlers)
-room.addEventListener('PeerJoined', (event) => {
-    const payload = event.payload;
+room.addEventListener("PeerJoined", (event) => {
+  const payload = event.payload;
 });
 ```
 
@@ -214,23 +215,23 @@ Both patterns work on `room` and on `peer` objects (e.g. `peer.onAudioActivity`,
 
 ### Room Events
 
-| `on*` Callback | `addEventListener` Name | Payload |
-|---|---|---|
-| `onJoined` | `'Joined'` | `{ room, peer }` |
-| `onLeft` | `'Left'` | `{ room, reason }` |
-| `onStatusChanged` | `'RoomStatusChanged'` | `{ oldState, newState }` |
-| `onDataChanged` | `'RoomDataChanged'` | `{ room }` |
-| `onPeerJoined` | `'PeerJoined'` | `{ room, peer }` |
-| `onPeerLeft` | `'PeerLeft'` | `{ room, peer }` |
-| `onUserDataChanged` | `'UserDataChanged'` | `{ room, peer }` |
-| `onAudioOutputStarted` | `'AudioOutputStarted'` | `{ room, peer, media }` |
-| `onAudioOutputStopped` | `'AudioOutputStopped'` | `{ room, peer, media }` |
-| `onAudioActivity` | `'AudioActivity'` | `{ media }` |
-| `onAudioPowerLevel` | `'AudioPowerLevel'` | `{ media }` |
-| `onMessageReceived` | `'MessageReceived'` | `{ room, peer, message }` |
-| `onConnectionStats` | `'ConnectionStats'` | `{ rtt, bytesReceivedLastSecond, bytesSentLastSecond, ... }` |
-| `onMediaStarted` | `'MediaStarted'` | `{ room, peer, media }` |
-| `onMediaStopped` | `'MediaStopped'` | `{ room, peer, media }` |
+| `on*` Callback         | `addEventListener` Name | Payload                                                      |
+| ---------------------- | ----------------------- | ------------------------------------------------------------ |
+| `onJoined`             | `'Joined'`              | `{ room, peer }`                                             |
+| `onLeft`               | `'Left'`                | `{ room, reason }`                                           |
+| `onStatusChanged`      | `'RoomStatusChanged'`   | `{ oldState, newState }`                                     |
+| `onDataChanged`        | `'RoomDataChanged'`     | `{ room }`                                                   |
+| `onPeerJoined`         | `'PeerJoined'`          | `{ room, peer }`                                             |
+| `onPeerLeft`           | `'PeerLeft'`            | `{ room, peer }`                                             |
+| `onUserDataChanged`    | `'UserDataChanged'`     | `{ room, peer }`                                             |
+| `onAudioOutputStarted` | `'AudioOutputStarted'`  | `{ room, peer, media }`                                      |
+| `onAudioOutputStopped` | `'AudioOutputStopped'`  | `{ room, peer, media }`                                      |
+| `onAudioActivity`      | `'AudioActivity'`       | `{ media }`                                                  |
+| `onAudioPowerLevel`    | `'AudioPowerLevel'`     | `{ media }`                                                  |
+| `onMessageReceived`    | `'MessageReceived'`     | `{ room, peer, message }`                                    |
+| `onConnectionStats`    | `'ConnectionStats'`     | `{ rtt, bytesReceivedLastSecond, bytesSentLastSecond, ... }` |
+| `onMediaStarted`       | `'MediaStarted'`        | `{ room, peer, media }`                                      |
+| `onMediaStopped`       | `'MediaStopped'`        | `{ room, peer, media }`                                      |
 
 > **Note**: The `addEventListener` names for `onStatusChanged` and `onDataChanged` are prefixed with `Room` (`'RoomStatusChanged'`, `'RoomDataChanged'`).
 
@@ -238,22 +239,22 @@ Both patterns work on `room` and on `peer` objects (e.g. `peer.onAudioActivity`,
 
 Peer objects also emit events. Use these on individual `RemotePeer` or `LocalPeer` instances:
 
-| `on*` Callback | `addEventListener` Name | Payload |
-|---|---|---|
-| `onAudioActivity` | `'AudioActivity'` | `{ media }` |
-| `onPowerLevel` | `'AudioPowerLevel'` | `{ media }` |
-| `onUserDataChanged` | `'UserDataChanged'` | `{ room, peer }` |
-| `onAudioOutputStarted` | `'AudioOutputStarted'` | `{ room, peer, media }` |
-| `onAudioOutputStopped` | `'AudioOutputStopped'` | `{ room, peer, media }` |
-| `onMediaStarted` | `'MediaStarted'` | `{ room, peer, media }` |
-| `onMediaStopped` | `'MediaStopped'` | `{ room, peer, media }` |
+| `on*` Callback         | `addEventListener` Name | Payload                 |
+| ---------------------- | ----------------------- | ----------------------- |
+| `onAudioActivity`      | `'AudioActivity'`       | `{ media }`             |
+| `onPowerLevel`         | `'AudioPowerLevel'`     | `{ media }`             |
+| `onUserDataChanged`    | `'UserDataChanged'`     | `{ room, peer }`        |
+| `onAudioOutputStarted` | `'AudioOutputStarted'`  | `{ room, peer, media }` |
+| `onAudioOutputStopped` | `'AudioOutputStopped'`  | `{ room, peer, media }` |
+| `onMediaStarted`       | `'MediaStarted'`        | `{ room, peer, media }` |
+| `onMediaStopped`       | `'MediaStopped'`        | `{ room, peer, media }` |
 
 ```javascript
 // Example: listen for audio activity on a specific peer
 room.onPeerJoined = ({ peer }) => {
-    peer.onAudioActivity = ({ media }) => {
-        console.log(`Peer ${peer.userId} speaking: ${media.isActive}`);
-    };
+  peer.onAudioActivity = ({ media }) => {
+    console.log(`Peer ${peer.userId} speaking: ${media.isActive}`);
+  };
 };
 ```
 
@@ -265,18 +266,18 @@ Individual `AudioInput` and `AudioOutput` instances also emit events. Use these 
 
 **AudioInput events:**
 
-| `on*` Callback | `addEventListener` Name | Payload |
-|---|---|---|
-| `onAudioActivity` | `'Activity'` | `{ media }` |
-| `onPowerLevel` | `'PowerLevel'` | `{ media }` |
+| `on*` Callback    | `addEventListener` Name | Payload     |
+| ----------------- | ----------------------- | ----------- |
+| `onAudioActivity` | `'Activity'`            | `{ media }` |
+| `onPowerLevel`    | `'PowerLevel'`          | `{ media }` |
 
 **AudioOutput events:**
 
-| `on*` Callback | `addEventListener` Name | Payload |
-|---|---|---|
-| `onAudioActivity` | `'Activity'` | `boolean` (isActive) |
-| `onPowerLevel` | `'PowerLevel'` | `number` (powerLevel in dBFS) |
-| `onJitterStats` | `'JitterStats'` | `JitterStats` |
+| `on*` Callback    | `addEventListener` Name | Payload                       |
+| ----------------- | ----------------------- | ----------------------------- |
+| `onAudioActivity` | `'Activity'`            | `boolean` (isActive)          |
+| `onPowerLevel`    | `'PowerLevel'`          | `number` (powerLevel in dBFS) |
+| `onJitterStats`   | `'JitterStats'`         | `JitterStats`                 |
 
 > **Note**: `AudioOutput` callbacks receive simplified values (`boolean` / `number`), while `AudioInput` callbacks receive `{ media }` payload objects. The `addEventListener` pattern always wraps the payload in `event.payload`.
 
@@ -285,16 +286,16 @@ Individual `AudioInput` and `AudioOutput` instances also emit events. Use these 
 const audioInput = await ODIN.DeviceManager.createAudioInput({});
 
 audioInput.onAudioActivity = ({ media }) => {
-    console.log('Mic active:', media.isActive);
+  console.log("Mic active:", media.isActive);
 };
 
 audioInput.onPowerLevel = ({ media }) => {
-    console.log('Mic power level:', media.powerLevel, 'dBFS');
+  console.log("Mic power level:", media.powerLevel, "dBFS");
 };
 
 // Or via addEventListener
-audioInput.addEventListener('Activity', (event) => {
-    console.log('Activity:', event.payload.media.isActive);
+audioInput.addEventListener("Activity", (event) => {
+  console.log("Activity:", event.payload.media.isActive);
 });
 ```
 
@@ -305,21 +306,23 @@ Tokens must be generated server-side to protect your access key.
 ### Backend (Node.js)
 
 ```javascript
-const { TokenGenerator } = require('@4players/odin-tokens');
+const { TokenGenerator } = require("@4players/odin-tokens");
 const generator = new TokenGenerator(process.env.ODIN_ACCESS_KEY);
 
-app.get('/api/odin-token', (req, res) => {
-    const token = generator.createToken('room-id', req.user.id, { lifetime: 300 });
-    res.json({ token });
+app.get("/api/odin-token", (req, res) => {
+  const token = generator.createToken("room-id", req.user.id, {
+    lifetime: 300,
+  });
+  res.json({ token });
 });
 ```
 
 ### Frontend
 
 ```javascript
-const response = await fetch('/api/odin-token');
+const response = await fetch("/api/odin-token");
 const { token } = await response.json();
-await room.join(token, { gateway: 'https://gateway.odin.4players.io' });
+await room.join(token, { gateway: "https://gateway.odin.4players.io" });
 ```
 
 **Security**: Never embed access keys in client-side code.
@@ -330,15 +333,17 @@ await room.join(token, { gateway: 'https://gateway.odin.4players.io' });
 
 ```javascript
 // Set user data
-room.userData = ODIN.valueToUint8Array({ nickname: 'Alice' });
+room.userData = ODIN.valueToUint8Array({ nickname: "Alice" });
 room.flushUserData();
 
 // Send message
-await room.sendMessage(ODIN.valueToUint8Array({ type: 'chat', text: 'Hello!' }));
+await room.sendMessage(
+  ODIN.valueToUint8Array({ type: "chat", text: "Hello!" }),
+);
 
 // Receive message
 room.onMessageReceived = (payload) => {
-    const data = ODIN.uint8ArrayToValue(payload.message);
+  const data = ODIN.uint8ArrayToValue(payload.message);
 };
 ```
 
@@ -350,24 +355,24 @@ const videoInput = await ODIN.DeviceManager.createVideoInput(stream);
 await room.addVideoInput(videoInput);
 
 room.onVideoOutputStarted = async (payload) => {
-    await payload.media.start();
-    const video = document.createElement('video');
-    video.srcObject = payload.media.mediaStream;
-    video.autoplay = true;
+  await payload.media.start();
+  const video = document.createElement("video");
+  video.srcObject = payload.media.mediaStream;
+  video.autoplay = true;
 };
 ```
 
 ## Additional Documentation
 
-- **Audio Processing (APM)**: See [voice-web-audio-processing.md](voice-web-audio-processing.md) for presets and dBFS tuning
-- **Framework Integration**: See [voice-web-frameworks.md](voice-web-frameworks.md) for React, Vue, Angular examples
-- **Advanced Patterns**: See [voice-web-advanced.md](voice-web-advanced.md) for push-to-talk, reconnection, device selection
+- **Audio Processing (APM)**: See [references/audio-processing.md](references/audio-processing.md) for presets and dBFS tuning
+- **Framework Integration**: See [references/framework-integration.md](references/framework-integration.md) for React, Vue, Angular examples
+- **Advanced Patterns**: See [references/advanced-patterns.md](references/advanced-patterns.md) for push-to-talk, reconnection, device selection
 
 ## Troubleshooting
 
-**"AudioContext not allowed to start"**: Call `initPlugin()` from a button click handler.
+**"AudioContext not allowed to start"**: Call `setOutputDevice({})` or `room.join()` from a button click handler.
 
-**No audio from peers**: Verify `await audioPlugin.setOutputDevice({})` was called BEFORE `room.join()`.
+**No audio from peers**: Verify `await setOutputDevice({})` was called BEFORE `room.join()`.
 
 **Microphone not transmitting**: Check `await room.addAudioInput(audioInput)` was called.
 

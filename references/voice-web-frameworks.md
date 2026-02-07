@@ -14,153 +14,139 @@ Complete examples for React, Vue 3, and Angular based on the tested working exam
 
 ```tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { init, Room, DeviceManager, AudioInput } from "@4players/odin";
-import { createPlugin } from "@4players/odin-plugin-web";
+import { Room, DeviceManager, AudioInput, setOutputDevice } from "@4players/odin";
 import { TokenGenerator } from "@4players/odin-tokens";
 
 interface PeerInfo {
-  id: number;
-  userId: string;
-  isLocal: boolean;
+    id: number;
+    userId: string;
+    isLocal: boolean;
 }
 
 function App() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [peers, setPeers] = useState<PeerInfo[]>([]);
-  const [speakingPeers, setSpeakingPeers] = useState<Set<number>>(new Set());
-  const [isMuted, setIsMuted] = useState(false);
+    const [isConnected, setIsConnected] = useState(false);
+    const [peers, setPeers] = useState<PeerInfo[]>([]);
+    const [speakingPeers, setSpeakingPeers] = useState<Set<number>>(new Set());
+    const [isMuted, setIsMuted] = useState(false);
 
-  const roomRef = useRef<Room | null>(null);
-  const audioInputRef = useRef<AudioInput | null>(null);
-  const pluginRef = useRef<ReturnType<typeof createPlugin> | null>(null);
+    const roomRef = useRef<Room | null>(null);
+    const audioInputRef = useRef<AudioInput | null>(null);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      audioInputRef.current?.close();
-      roomRef.current?.leave();
-    };
-  }, []);
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            audioInputRef.current?.close();
+            roomRef.current?.leave();
+        };
+    }, []);
 
-  // Initialize plugin (only once)
-  const initPlugin = useCallback(() => {
-    if (pluginRef.current) return;
-    pluginRef.current = createPlugin(async (sampleRate) => {
-      const audioContext = new AudioContext({ sampleRate });
-      await audioContext.resume();
-      return audioContext;
-    });
-    init(pluginRef.current);
-  }, []);
+    const joinRoom = async () => {
 
-  const joinRoom = async () => {
-    initPlugin();
+        // Generate token (in production, fetch from your backend instead)
+        const generator = new TokenGenerator("YOUR_ACCESS_KEY");
+        const token = await generator.createToken("default", "react-user");
 
-    // Generate token (in production, fetch from your backend instead)
-    const generator = new TokenGenerator("YOUR_ACCESS_KEY");
-    const token = await generator.createToken("default", "react-user");
+        const room = new Room();
+        roomRef.current = room;
 
-    const room = new Room();
-    roomRef.current = room;
+        // Register event handlers BEFORE joining
+        room.onJoined = () => setIsConnected(true);
+        room.onLeft = () => {
+            setIsConnected(false);
+            setPeers([]);
+        };
 
-    // Register event handlers BEFORE joining
-    room.onJoined = () => setIsConnected(true);
-    room.onLeft = () => {
-      setIsConnected(false);
-      setPeers([]);
-    };
+        room.onPeerJoined = (payload) => {
+            const isLocal = payload.peer.id === room.ownPeerId;
+            setPeers((prev) => [
+                ...prev.filter((p) => p.id !== payload.peer.id),
+                { id: payload.peer.id, userId: payload.peer.userId, isLocal },
+            ]);
 
-    room.onPeerJoined = (payload) => {
-      const isLocal = payload.peer.id === room.ownPeerId;
-      setPeers((prev) => [
-        ...prev.filter((p) => p.id !== payload.peer.id),
-        { id: payload.peer.id, userId: payload.peer.userId, isLocal },
-      ]);
+            // Listen for audio activity on this peer
+            payload.peer.onAudioActivity = ({ media }) => {
+                setSpeakingPeers((prev) => {
+                    const next = new Set(prev);
+                    if (media.isActive) {
+                        next.add(payload.peer.id);
+                    } else {
+                        next.delete(payload.peer.id);
+                    }
+                    return next;
+                });
+            };
+        };
 
-      // Listen for audio activity on this peer
-      payload.peer.onAudioActivity = ({ media }) => {
-        setSpeakingPeers((prev) => {
-          const next = new Set(prev);
-          if (media.isActive) {
-            next.add(payload.peer.id);
-          } else {
-            next.delete(payload.peer.id);
-          }
-          return next;
-        });
-      };
-    };
+        room.onPeerLeft = (payload) => {
+            setPeers((prev) => prev.filter((p) => p.id !== payload.peer.id));
+            setSpeakingPeers((prev) => {
+                const next = new Set(prev);
+                next.delete(payload.peer.id);
+                return next;
+            });
+        };
 
-    room.onPeerLeft = (payload) => {
-      setPeers((prev) => prev.filter((p) => p.id !== payload.peer.id));
-      setSpeakingPeers((prev) => {
-        const next = new Set(prev);
-        next.delete(payload.peer.id);
-        return next;
-      });
+        // Set output device BEFORE joining (required to hear other peers)
+        await setOutputDevice({});
+        await room.join(token, { gateway: "https://gateway.odin.4players.io" });
+
+        // Create and add microphone input (defaults: system mic with echo cancellation, noise suppression, gain control)
+        const audioInput = await DeviceManager.createAudioInput();
+        audioInputRef.current = audioInput;
+        await room.addAudioInput(audioInput);
     };
 
-    // Set output device BEFORE joining (required to hear other peers)
-    await pluginRef.current!.setOutputDevice({});
-    await room.join(token, { gateway: "https://gateway.odin.4players.io" });
+    const leaveRoom = () => {
+        if (audioInputRef.current) {
+            roomRef.current?.removeAudioInput(audioInputRef.current);
+            audioInputRef.current.close();
+            audioInputRef.current = null;
+        }
+        if (roomRef.current) {
+            roomRef.current.leave();
+            roomRef.current = null;
+        }
+        setIsMuted(false);
+    };
 
-    // Create and add microphone input (defaults: system mic with echo cancellation, noise suppression, gain control)
-    const audioInput = await DeviceManager.createAudioInput();
-    audioInputRef.current = audioInput;
-    await room.addAudioInput(audioInput);
-  };
+    const toggleMute = async () => {
+        if (!audioInputRef.current) return;
 
-  const leaveRoom = () => {
-    if (audioInputRef.current) {
-      roomRef.current?.removeAudioInput(audioInputRef.current);
-      audioInputRef.current.close();
-      audioInputRef.current = null;
-    }
-    if (roomRef.current) {
-      roomRef.current.leave();
-      roomRef.current = null;
-    }
-    setIsMuted(false);
-  };
+        if (isMuted) {
+            // Unmute: restore volume and re-add to room to resume encoding
+            await audioInputRef.current.setVolume(1);
+            await roomRef.current?.addAudioInput(audioInputRef.current);
+        } else {
+            // Mute: remove from room to stop encoder, use 'muted' to stop MediaStream
+            // (removes browser recording indicator)
+            roomRef.current?.removeAudioInput(audioInputRef.current);
+            await audioInputRef.current.setVolume("muted");
+        }
+        setIsMuted(!isMuted);
+    };
 
-  const toggleMute = async () => {
-    if (!audioInputRef.current) return;
-
-    if (isMuted) {
-      // Unmute: restore volume and re-add to room to resume encoding
-      await audioInputRef.current.setVolume(1);
-      await roomRef.current?.addAudioInput(audioInputRef.current);
-    } else {
-      // Mute: remove from room to stop encoder, use 'muted' to stop MediaStream
-      // (removes browser recording indicator)
-      roomRef.current?.removeAudioInput(audioInputRef.current);
-      await audioInputRef.current.setVolume("muted");
-    }
-    setIsMuted(!isMuted);
-  };
-
-  return (
-    <div>
-      {!isConnected ? (
-        <button onClick={joinRoom}>Join Voice Chat</button>
-      ) : (
+    return (
         <div>
-          <button onClick={toggleMute}>{isMuted ? "Unmute" : "Mute"}</button>
-          <button onClick={leaveRoom}>Leave</button>
+            {!isConnected ? (
+                <button onClick={joinRoom}>Join Voice Chat</button>
+            ) : (
+                <div>
+                    <button onClick={toggleMute}>{isMuted ? "Unmute" : "Mute"}</button>
+                    <button onClick={leaveRoom}>Leave</button>
 
-          <h3>Peers ({peers.length})</h3>
-          <ul>
-            {peers.map((peer) => (
-              <li key={peer.id}>
-                {peer.isLocal ? "You" : peer.userId}
-                {speakingPeers.has(peer.id) && " (speaking)"}
-              </li>
-            ))}
-          </ul>
+                    <h3>Peers ({peers.length})</h3>
+                    <ul>
+                        {peers.map((peer) => (
+                            <li key={peer.id}>
+                                {peer.isLocal ? "You" : peer.userId}
+                                {speakingPeers.has(peer.id) && " (speaking)"}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default App;
@@ -197,12 +183,11 @@ export default App;
 <script setup lang="ts">
 import { ref, shallowRef, onUnmounted } from "vue";
 import {
-  init,
   Room,
   DeviceManager,
+  setOutputDevice,
   type AudioInput as AudioInputType,
 } from "@4players/odin";
-import { createPlugin } from "@4players/odin-plugin-web";
 import { TokenGenerator } from "@4players/odin-tokens";
 
 interface PeerInfo {
@@ -219,24 +204,11 @@ const isMuted = ref(false);
 
 const room = shallowRef<Room | null>(null);
 const audioInput = shallowRef<AudioInputType | null>(null);
-let audioPlugin: ReturnType<typeof createPlugin>;
-
-// Initialize plugin (only once)
-const initPlugin = () => {
-  if (audioPlugin) return;
-  audioPlugin = createPlugin(async (sampleRate) => {
-    const audioContext = new AudioContext({ sampleRate });
-    await audioContext.resume();
-    return audioContext;
-  });
-  init(audioPlugin);
-};
 
 const joinRoom = async () => {
   isConnecting.value = true;
 
   try {
-    initPlugin();
 
     // Generate token (in production, fetch from your backend instead)
     const generator = new TokenGenerator("YOUR_ACCESS_KEY");
@@ -283,7 +255,7 @@ const joinRoom = async () => {
     };
 
     // Set output device BEFORE joining (required to hear other peers)
-    await audioPlugin.setOutputDevice({});
+    await setOutputDevice({});
     await room.value.join(token, {
       gateway: "https://gateway.odin.4players.io",
     });
@@ -339,28 +311,27 @@ onUnmounted(() => {
 
 ```typescript
 import {
-  Component,
-  OnDestroy,
-  signal,
-  ChangeDetectionStrategy,
+    Component,
+    OnDestroy,
+    signal,
+    ChangeDetectionStrategy,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { init, Room, DeviceManager, AudioInput } from "@4players/odin";
-import { createPlugin } from "@4players/odin-plugin-web";
+import { Room, DeviceManager, AudioInput, setOutputDevice } from "@4players/odin";
 import { TokenGenerator } from "@4players/odin-tokens";
 
 interface PeerInfo {
-  id: number;
-  userId: string;
-  isLocal: boolean;
+    id: number;
+    userId: string;
+    isLocal: boolean;
 }
 
 @Component({
-  selector: "app-root",
-  standalone: true,
-  imports: [FormsModule],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
+    selector: "app-root",
+    standalone: true,
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    template: `
     @if (!isConnected()) {
       <button (click)="joinRoom()" [disabled]="isConnecting()">
         {{ isConnecting() ? "Connecting..." : "Join Voice Chat" }}
@@ -386,129 +357,116 @@ interface PeerInfo {
   `,
 })
 export class AppComponent implements OnDestroy {
-  isConnected = signal(false);
-  isConnecting = signal(false);
-  peers = signal<PeerInfo[]>([]);
-  speakingPeers = signal<Set<number>>(new Set());
-  isMuted = signal(false);
+    isConnected = signal(false);
+    isConnecting = signal(false);
+    peers = signal<PeerInfo[]>([]);
+    speakingPeers = signal<Set<number>>(new Set());
+    isMuted = signal(false);
 
-  private room: Room | null = null;
-  private audioInput: AudioInput | null = null;
-  private audioPlugin!: ReturnType<typeof createPlugin>;
+    private room: Room | null = null;
+    private audioInput: AudioInput | null = null;
 
-  ngOnDestroy() {
-    this.leaveRoom();
-  }
-
-  // Initialize plugin (only once)
-  private initPlugin() {
-    if (this.audioPlugin) return;
-    this.audioPlugin = createPlugin(async (sampleRate) => {
-      const audioContext = new AudioContext({ sampleRate });
-      await audioContext.resume();
-      return audioContext;
-    });
-    init(this.audioPlugin);
-  }
-
-  async joinRoom() {
-    this.isConnecting.set(true);
-
-    try {
-      this.initPlugin();
-
-      // Generate token (in production, fetch from your backend instead)
-      const generator = new TokenGenerator("YOUR_ACCESS_KEY");
-      const token = await generator.createToken("default", "angular-user");
-
-      this.room = new Room();
-
-      // Register event handlers BEFORE joining
-      this.room.onJoined = () => {
-        this.isConnected.set(true);
-        this.isConnecting.set(false);
-      };
-
-      this.room.onLeft = () => {
-        this.isConnected.set(false);
-        this.isConnecting.set(false);
-        this.peers.set([]);
-      };
-
-      this.room.onPeerJoined = (payload) => {
-        const isLocal = payload.peer.id === this.room!.ownPeerId;
-        this.peers.update((prev) => [
-          ...prev.filter((p) => p.id !== payload.peer.id),
-          { id: payload.peer.id, userId: payload.peer.userId, isLocal },
-        ]);
-
-        // Listen for audio activity on this peer
-        payload.peer.onAudioActivity = ({ media }) => {
-          this.speakingPeers.update((prev) => {
-            const next = new Set(prev);
-            if (media.isActive) {
-              next.add(payload.peer.id);
-            } else {
-              next.delete(payload.peer.id);
-            }
-            return next;
-          });
-        };
-      };
-
-      this.room.onPeerLeft = (payload) => {
-        this.peers.update((prev) =>
-          prev.filter((p) => p.id !== payload.peer.id),
-        );
-        this.speakingPeers.update((prev) => {
-          const next = new Set(prev);
-          next.delete(payload.peer.id);
-          return next;
-        });
-      };
-
-      // Set output device BEFORE joining (required to hear other peers)
-      await this.audioPlugin.setOutputDevice({});
-      await this.room.join(token, {
-        gateway: "https://gateway.odin.4players.io",
-      });
-
-      // Create and add microphone input (defaults: system mic with echo cancellation, noise suppression, gain control)
-      this.audioInput = await DeviceManager.createAudioInput();
-      await this.room.addAudioInput(this.audioInput);
-    } catch (e) {
-      this.isConnecting.set(false);
-      throw e;
+    ngOnDestroy() {
+        this.leaveRoom();
     }
-  }
 
-  leaveRoom() {
-    if (this.audioInput) {
-      this.room?.removeAudioInput(this.audioInput);
-      this.audioInput.close();
-      this.audioInput = null;
-    }
-    if (this.room) {
-      this.room.leave();
-      this.room = null;
-    }
-    this.isMuted.set(false);
-  }
+    async joinRoom() {
+        this.isConnecting.set(true);
 
-  async toggleMute() {
-    if (!this.audioInput) return;
+        try {
 
-    if (this.isMuted()) {
-      // Unmute: restore volume and re-add to room to resume encoding
-      await this.audioInput.setVolume(1);
-      await this.room?.addAudioInput(this.audioInput);
-    } else {
-      // Mute: remove from room to stop encoder, use 'muted' to stop MediaStream
-      // (removes browser recording indicator)
-      this.room?.removeAudioInput(this.audioInput);
-      await this.audioInput.setVolume("muted");
+            // Generate token (in production, fetch from your backend instead)
+            const generator = new TokenGenerator("YOUR_ACCESS_KEY");
+            const token = await generator.createToken("default", "angular-user");
+
+            this.room = new Room();
+
+            // Register event handlers BEFORE joining
+            this.room.onJoined = () => {
+                this.isConnected.set(true);
+                this.isConnecting.set(false);
+            };
+
+            this.room.onLeft = () => {
+                this.isConnected.set(false);
+                this.isConnecting.set(false);
+                this.peers.set([]);
+            };
+
+            this.room.onPeerJoined = (payload) => {
+                const isLocal = payload.peer.id === this.room!.ownPeerId;
+                this.peers.update((prev) => [
+                    ...prev.filter((p) => p.id !== payload.peer.id),
+                    { id: payload.peer.id, userId: payload.peer.userId, isLocal },
+                ]);
+
+                // Listen for audio activity on this peer
+                payload.peer.onAudioActivity = ({ media }) => {
+                    this.speakingPeers.update((prev) => {
+                        const next = new Set(prev);
+                        if (media.isActive) {
+                            next.add(payload.peer.id);
+                        } else {
+                            next.delete(payload.peer.id);
+                        }
+                        return next;
+                    });
+                };
+            };
+
+            this.room.onPeerLeft = (payload) => {
+                this.peers.update((prev) =>
+                    prev.filter((p) => p.id !== payload.peer.id),
+                );
+                this.speakingPeers.update((prev) => {
+                    const next = new Set(prev);
+                    next.delete(payload.peer.id);
+                    return next;
+                });
+            };
+
+            // Set output device BEFORE joining (required to hear other peers)
+            await setOutputDevice({});
+            await this.room.join(token, {
+                gateway: "https://gateway.odin.4players.io",
+            });
+
+            // Create and add microphone input (defaults: system mic with echo cancellation, noise suppression, gain control)
+            this.audioInput = await DeviceManager.createAudioInput();
+            await this.room.addAudioInput(this.audioInput);
+        } catch (e) {
+            this.isConnecting.set(false);
+            throw e;
+        }
     }
-    this.isMuted.update((v) => !v);
-  }
+
+    leaveRoom() {
+        if (this.audioInput) {
+            this.room?.removeAudioInput(this.audioInput);
+            this.audioInput.close();
+            this.audioInput = null;
+        }
+        if (this.room) {
+            this.room.leave();
+            this.room = null;
+        }
+        this.isMuted.set(false);
+    }
+
+    async toggleMute() {
+        if (!this.audioInput) return;
+
+        if (this.isMuted()) {
+            // Unmute: restore volume and re-add to room to resume encoding
+            await this.audioInput.setVolume(1);
+            await this.room?.addAudioInput(this.audioInput);
+        } else {
+            // Mute: remove from room to stop encoder, use 'muted' to stop MediaStream
+            // (removes browser recording indicator)
+            this.room?.removeAudioInput(this.audioInput);
+            await this.audioInput.setVolume("muted");
+        }
+        this.isMuted.update((v) => !v);
+    }
 }
 ```

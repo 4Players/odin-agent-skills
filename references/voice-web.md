@@ -104,8 +104,8 @@ async function leaveRoom() {
 ### Critical Requirements
 
 - **User Interaction**: Modern browsers require direct user interaction (click/tap) to start AudioContext
-- **Event Registration**: Register all event handlers BEFORE calling `room.join()`
-- **Output Device**: `await setOutputDevice({})` MUST be called BEFORE `room.join()` to hear other peers. After the initial call it can be used at any time to switch the output device.
+- **Event Registration**: Register all event handlers BEFORE calling `room.join()` so you receive events that occur while joining (e.g. remote peers already in the room).
+- **Output Device**: Call `setOutputDevice({})` to hear other peers; it can be used at any time to set or switch the output device.
 - **Audio Activation**: Audio is only transmitted after calling `room.addAudioInput(audioInput)`
 
 ## Core Classes
@@ -372,11 +372,11 @@ room.onVideoOutputStarted = async (payload) => {
 
 **"AudioContext not allowed to start"**: Call `setOutputDevice({})` or `room.join()` from a button click handler.
 
-**No audio from peers**: Verify `await setOutputDevice({})` was called BEFORE `room.join()`.
+**No audio from peers**: Verify `setOutputDevice({})` has been called to configure the output device.
 
 **Microphone not transmitting**: Check `await room.addAudioInput(audioInput)` was called.
 
-**Events not firing**: Register handlers BEFORE calling `room.join()`.
+**Events not firing**: Register handlers BEFORE calling `room.join()` so you receive events that occur while joining (e.g. remote peers already in the room).
 
 ## Browser Compatibility
 

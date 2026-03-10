@@ -86,7 +86,6 @@ function App() {
             });
         };
 
-        // Set output device BEFORE joining (required to hear other peers)
         await setOutputDevice({});
         await room.join(token, { gateway: "https://gateway.odin.4players.io" });
 
@@ -254,7 +253,6 @@ const joinRoom = async () => {
       speakingPeers.value = next;
     };
 
-    // Set output device BEFORE joining (required to hear other peers)
     await setOutputDevice({});
     await room.value.join(token, {
       gateway: "https://gateway.odin.4players.io",
@@ -425,7 +423,6 @@ export class AppComponent implements OnDestroy {
                 });
             };
 
-            // Set output device BEFORE joining (required to hear other peers)
             await setOutputDevice({});
             await this.room.join(token, {
                 gateway: "https://gateway.odin.4players.io",

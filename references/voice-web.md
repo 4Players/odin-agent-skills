@@ -31,8 +31,8 @@ npm install @4players/odin
 > **Warning**: Using `latest` in the CDN URL (e.g. `.../latest/odin-sdk.js`) means your app automatically picks up new releases, including breaking changes. We recommend pinning a specific version to avoid unexpected issues:
 >
 > ```
-> https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.js
-> https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-plugin.js
+> https://cdn.odin.4players.io/client/js/sdk/1.4.4/odin-sdk.js
+> https://cdn.odin.4players.io/client/js/sdk/1.4.4/odin-plugin.js
 > ```
 >
 > **Note**: Check npm for the latest available versions:
@@ -43,7 +43,7 @@ npm install @4players/odin
 **IIFE (Global Variables)**:
 
 ```html
-<script src="https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.js"></script>
+<script src="https://cdn.odin.4players.io/client/js/sdk/1.4.4/odin-sdk.js"></script>
 <script>
   // Access via global ODIN object
   console.log(ODIN.Room);
@@ -54,7 +54,7 @@ npm install @4players/odin
 
 ```html
 <script type="module">
-  import * as ODIN from "https://cdn.odin.4players.io/client/js/sdk/1.4.0/odin-sdk.esm.js";
+  import * as ODIN from "https://cdn.odin.4players.io/client/js/sdk/1.4.4/odin-sdk.esm.js";
 </script>
 ```
 
